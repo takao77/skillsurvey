@@ -1,0 +1,5 @@
+flask>=3.0
+sqlalchemy>=2.0
+openpyxl>=3.1
+gunicorn>=22.0      # Azure App Service (Linux)
+# pyodbc>=5.1       # uncomment for Azure SQL (needs ODBC Driver 18 for SQL Server)

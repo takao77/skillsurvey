@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ title }}</title>
+<style>
+  :root{--ink:#111A2E;--muted:#687289;--paper:#F3F5F9;--surface:#fff;--line:#DDE2EC}
+  @media (prefers-color-scheme: dark){:root{--ink:#E8ECF5;--muted:#8F99AE;--paper:#0C1120;--surface:#141B2D;--line:#27304A;color-scheme:dark}}
+  body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 "Segoe UI",system-ui,-apple-system,sans-serif;display:grid;place-items:center;min-height:100vh;padding:16px;box-sizing:border-box}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:36px 32px;max-width:520px;text-align:center}
+  h1{font-size:24px;margin:14px 0 8px;letter-spacing:-.01em}
+  p{color:var(--muted);margin:0}
+</style>
+</head>
+<body>
+  <div class="card">
+    <svg width="34" height="34" viewBox="0 0 30 30" aria-hidden="true">
+      <rect x="2" y="19" width="4.2" height="9" rx="1.2" fill="#D3DAE6"/><rect x="7.6" y="15" width="4.2" height="13" rx="1.2" fill="#AFC7EC"/>
+      <rect x="13.2" y="11" width="4.2" height="17" rx="1.2" fill="#BCDDAE"/><rect x="18.8" y="7" width="4.2" height="21" rx="1.2" fill="#F4CE4B"/>
+      <rect x="24.4" y="3" width="4.2" height="25" rx="1.2" fill="#EE945A"/>
+    </svg>
+    <h1>{{ title }}</h1>
+    <p>{{ body }}</p>
+  </div>
+</body>
+</html>
