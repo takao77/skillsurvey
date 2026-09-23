@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skill Survey Admin</title>
+<style>
+:root{
+  --ink:#111A2E; --ink-2:#3A4560; --muted:#687289; --faint:#98A1B5;
+  --paper:#F3F5F9; --surface:#FFFFFF; --surface-2:#F8F9FC; --line:#DDE2EC; --line-2:#EBEEF4;
+  --accent:#2B50D6; --accent-soft:#E6ECFD; --accent-ink:#FFFFFF;
+  --good:#1F8A5B; --good-soft:#E2F4EA; --warn:#B7791F; --warn-soft:#FDF3DF; --bad:#C2413A; --bad-soft:#FBE7E5;
+  --pna:#EEF0F4; --p1:#D3DAE6; --p2:#AFC7EC; --p3:#BCDDAE; --p4:#F4CE4B; --p5:#EE945A; --on-p:#111A2E; --on-pna:#8A93A6;
+  --font:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,sans-serif;
+  --mono:"Cascadia Mono",Consolas,ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root{
+  color-scheme:dark;
+  --ink:#E8ECF5; --ink-2:#C2C9D8; --muted:#8F99AE; --faint:#6A7489;
+  --paper:#0C1120; --surface:#141B2D; --surface-2:#18203A; --line:#27304A; --line-2:#1F2740;
+  --accent:#7C98FF; --accent-soft:#1E2A55; --accent-ink:#0C1120;
+  --good:#4CC38A; --good-soft:#12301F; --warn:#E3B24F; --warn-soft:#33280F; --bad:#F07A71; --bad-soft:#3A1917;
+  --pna:#1B2238; --p1:#39445E; --p2:#2E4F86; --p3:#3D6A3B; --p4:#8E7318; --p5:#9A4D22; --on-p:#F1F4FA; --on-pna:#6A7489;
+}}
+*{box-sizing:border-box}
+html,body{background:var(--paper)}
+body{margin:0;color:var(--ink);font:14px/1.5 var(--font);-webkit-font-smoothing:antialiased}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:20px}
+header{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+header .wrap{display:flex;align-items:center;gap:16px;min-height:60px;flex-wrap:wrap;padding-block:8px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand b{font-size:17px;font-weight:700}
+.brand small{display:block;color:var(--muted);font-size:12px;line-height:1.2}
+.admin{font-size:11px;font-weight:700;letter-spacing:.08em;background:var(--ink);color:var(--paper);padding:3px 8px;border-radius:4px}
+.tabs{display:flex;gap:4px;margin-left:auto;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:4px}
+.tabs button{border:0;background:none;padding:6px 14px;border-radius:999px;color:var(--muted);font-weight:500}
+.tabs button[aria-current="true"]{background:var(--ink);color:var(--paper)}
+main{padding-block:24px 60px;display:grid;gap:18px}
+main>*{min-width:0}
+h1{font-size:28px;margin:0;letter-spacing:-.01em}
+h2{font-size:17px;margin:0}
+.sub{color:var(--muted);margin:4px 0 0}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--surface);padding:8px 14px;border-radius:9px;font-weight:500;white-space:nowrap}
+.btn:hover{border-color:var(--faint)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.kpi{padding:16px 18px}
+.kpi .l{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.kpi .v{font-size:30px;font-weight:700;line-height:1.1;margin-top:6px}
+.kpi .s{font-size:12px;color:var(--muted)}
+.bar{height:6px;background:var(--line-2);border-radius:6px;overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:6px}
+.two{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;align-items:start}
+.ph{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line-2);flex-wrap:wrap}
+.filters{display:flex;gap:8px;flex-wrap:wrap}
+select,input[type=search]{border:1px solid var(--line);background:var(--surface-2);border-radius:8px;padding:6px 10px}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%}
+.list{min-width:720px}
+.list th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;font-weight:600;padding:10px 16px;border-bottom:1px solid var(--line)}
+.list td{padding:11px 16px;border-bottom:1px solid var(--line-2)}
+.list tr:last-child td{border-bottom:0}
+.list small{display:block;color:var(--muted);font-size:12px}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.done{color:var(--good);background:var(--good-soft)}
+.prog{color:var(--warn);background:var(--warn-soft)}
+.new{color:var(--muted);background:var(--pna)}
+.mini{display:flex;align-items:center;gap:8px}
+.mini .bar{margin:0;width:70px;height:5px}
+.link{white-space:nowrap;border:1px solid var(--line);background:var(--surface-2);border-radius:6px;padding:3px 8px;font-size:12px;color:var(--muted)}
+.fam{padding:14px 16px;border-bottom:1px solid var(--line-2)}
+.fam:last-child{border-bottom:0}
+.fam .row{display:flex;justify-content:space-between;font-size:13px}
+.flag{display:flex;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line-2);font-size:13px}
+.flag:last-child{border-bottom:0}
+.flag i{width:8px;height:8px;border-radius:2px;flex:none;margin-top:6px}
+.flag small{display:block;color:var(--muted);font-size:12px}
+.heat{min-width:760px;font-size:12.5px}
+.heat th{font-weight:600;font-size:12px;padding:10px 6px;text-align:center;border-bottom:1px solid var(--line);color:var(--ink-2)}
+.heat th small{display:block;font-weight:400;color:var(--muted);font-family:var(--mono);font-size:10.5px}
+.heat th:first-child{text-align:left;padding-left:16px}
+.heat td{padding:4px;border-bottom:1px solid var(--line-2);text-align:center}
+.heat td:first-child{text-align:left;padding:8px 16px;font-weight:600}
+.chip{display:block;border-radius:6px;padding:7px 4px;font-weight:600;color:var(--on-p)}
+.chip.na{color:var(--on-pna);font-weight:500}
+.q{font-family:var(--mono);font-size:12px;color:var(--ink-2);padding:6px 4px}
+.q b{display:block;font-weight:600;font-size:13px}
+.legend{display:flex;gap:6px;flex-wrap:wrap;padding:12px 16px;border-top:1px solid var(--line-2)}
+.legend span{font-size:11.5px;padding:3px 8px;border-radius:5px;color:var(--on-p)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:var(--surface-2);padding:6px 12px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:9px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;max-width:calc(100% - 32px)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.note{font-size:12px;color:var(--muted);text-align:center}
+.empty{padding:28px 16px;text-align:center;color:var(--muted)}
+a.btn{text-decoration:none;color:inherit;display:inline-block}a.btn.primary{color:var(--accent-ink)}
+[hidden]{display:none!important}
+@media (max-width:960px){.two{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.wrap{padding-inline:16px}.tabs{margin-left:0;width:100%;justify-content:space-between}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="brand">
+      <svg width="28" height="28" viewBox="0 0 30 30" aria-hidden="true">
+        <rect x="2" y="19" width="4.2" height="9" rx="1.2" fill="var(--p1)"/><rect x="7.6" y="15" width="4.2" height="13" rx="1.2" fill="var(--p2)"/>
+        <rect x="13.2" y="11" width="4.2" height="17" rx="1.2" fill="var(--p3)"/><rect x="18.8" y="7" width="4.2" height="21" rx="1.2" fill="var(--p4)"/>
+        <rect x="24.4" y="3" width="4.2" height="25" rx="1.2" fill="var(--p5)"/>
+      </svg>
+      <div><b>Skill Maturity Survey</b><small id="subtitle"></small></div>
+      <span class="admin">ADMIN</span>
+    </div>
+    <nav class="tabs">
+      <button data-tab="progress" aria-current="true">Progress</button>
+      <button data-tab="results" aria-current="false">Results</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="progress">
+    <div class="top" style="margin-bottom:18px">
+      <div><h1>Survey progress</h1><p class="sub" id="asof"></p></div>
+      <div class="actions">
+        <a class="btn" href="/admin/pending.csv">Download reminder list</a>
+        <a class="btn primary" id="xlsx" href="/admin/workbook.xlsx">Download Excel workbook</a>
+      </div>
+    </div>
+    <div class="kpis" id="kpis"></div>
+    <div class="two" style="margin-top:18px">
+      <div class="panel">
+        <div class="ph"><h2>Managers</h2>
+          <div class="filters">
+            <input type="search" id="q" placeholder="Search name or email" aria-label="Search managers">
+            <select id="fFam" aria-label="Job family"></select>
+            <select id="fSt" aria-label="Status"><option value="">All statuses</option><option>Submitted</option><option>In progress</option><option>Not started</option></select>
+          </div>
+        </div>
+        <div class="tw"><table class="list"><thead><tr><th>Manager</th><th>Job family</th><th>Progress</th><th>Status</th><th>Last activity</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
+      </div>
+      <div style="display:grid;gap:18px">
+        <div class="panel"><div class="ph"><h2>By job family</h2></div><div id="fams"></div></div>
+        <div class="panel"><div class="ph"><h2>Needs attention</h2></div><div id="attn"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="results" hidden>
+    <div class="top" style="margin-bottom:18px">
+      <div><h1>Results</h1><p class="sub" id="rsub"></p></div>
+      <div class="actions">
+        <select id="rFam" aria-label="Job family"></select>
+        <select id="thr" aria-label="N/A threshold"></select>
+        <div class="seg"><button data-view="qual" aria-pressed="true">Qual</button><button data-view="quant" aria-pressed="false">Quant</button></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="tw"><table class="heat"><thead id="hh"></thead><tbody id="hb"></tbody></table></div>
+      <div class="legend" id="legend"></div>
+    </div>
+    <div class="panel" style="margin-top:18px"><div class="ph"><h2>HR insights</h2></div><div id="flags"></div></div>
+  </section>
+
+  <p class="note">Individual answers stay within the HR analytics team. Share the Excel workbook's Quant and Qual tabs with HR.</p>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>window.ADMIN = {{ data|tojson }};</script>
+<script>
+(function(){
+"use strict";
+const D = window.ADMIN;
+const PL=["N/A","Basic","Intermediate","Proficient","Advanced","Expert"];
+const PC=["var(--pna)","var(--p1)","var(--p2)","var(--p3)","var(--p4)","var(--p5)"];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt=s=>s?new Date(s).toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}):"—";
+const f2=x=>x==null?"—":x.toFixed(2);
+let tt;function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("show"),2500)}
+const M=D.managers, FAMS=Object.keys(D.families);
+
+$("#subtitle").textContent=`${D.wave} · ${D.closed?"closed":"closes"} ${D.closes_label}`;
+$("#asof").textContent=`As of ${new Date().toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})} · reload the page to refresh`;
+
+/* ---------- progress ---------- */
+function renderProgress(){
+  const tot=M.length, sub=M.filter(m=>m.status==="Submitted").length, prog=M.filter(m=>m.status==="In progress").length, ns=tot-sub-prog;
+  const k=[["Invited",tot,"unique links created",null],["Submitted",sub,tot?`${Math.round(sub/tot*100)}% response rate`:"—",tot?sub/tot:0],["In progress",prog,"started, not submitted",null],["Not started",ns,"need a reminder",null]];
+  $("#kpis").innerHTML=k.map(([l,v,s,p])=>`<div class="panel kpi"><div class="l">${l}</div><div class="v num">${v}</div><div class="s">${s}</div>${p!==null?`<div class="bar"><i style="width:${p*100}%"></i></div>`:""}</div>`).join("");
+  $("#fams").innerHTML=FAMS.map(f=>{const all=M.filter(m=>m.family===f),d=all.filter(m=>m.status==="Submitted").length,need=D.min_raters-d;
+    return `<div class="fam"><div class="row"><b>${esc(f)}</b><span class="num">${d}/${all.length}</span></div><div class="bar"><i style="width:${all.length?d/all.length*100:0}%;background:${need<=0?"var(--good)":"var(--warn)"}"></i></div><small class="sub" style="font-size:12px">${!all.length?"No managers invited":need<=0?"Enough raters":`Needs ${need} more submission${need>1?"s":""}`}</small></div>`}).join("")||`<div class="empty">No job families loaded.</div>`;
+  const attn=[];
+  if(ns) attn.push(["var(--bad)",`${ns} manager${ns>1?"s":""} not started`,"Download the reminder list and send a reminder"]);
+  const low=FAMS.filter(f=>M.some(m=>m.family===f)&&M.filter(m=>m.family===f&&m.status==="Submitted").length<D.min_raters);
+  if(low.length) attn.push(["var(--warn)",`${low.length} job famil${low.length>1?"ies":"y"} below ${D.min_raters} raters`,low.join(", ")]);
+  attn.push(["var(--accent)",D.closed?"Survey closed":`${D.days_left} day${D.days_left===1?"":"s"} left`,`Closes ${D.closes_label}`]);
+  $("#attn").innerHTML=attn.map(([c,t,d])=>`<div class="flag"><i style="background:${c}"></i><div><b>${esc(t)}</b><small>${esc(d)}</small></div></div>`).join("");
+  renderRows();
+}
+function renderRows(){
+  const q=$("#q").value.toLowerCase(), ff=$("#fFam").value, fs=$("#fSt").value;
+  const cls={"Submitted":"done","In progress":"prog","Not started":"new"};
+  const rows=M.filter(m=>(!q||m.name.toLowerCase().includes(q)||m.email.includes(q))&&(!ff||m.family===ff)&&(!fs||m.status===fs));
+  $("#rows").innerHTML=rows.map((m,i)=>`<tr>
+    <td><b>${esc(m.name)}</b><small>${esc(m.email)}</small></td>
+    <td>${esc(m.family)}</td>
+    <td><div class="mini"><div class="bar"><i style="width:${m.pct*100}%;${m.status==="Submitted"?"background:var(--good)":""}"></i></div><span class="num" style="font-size:12px">${Math.round(m.pct*100)}%</span></div></td>
+    <td><span class="pill ${cls[m.status]}">${m.status}</span></td>
+    <td class="num" style="font-size:12px;color:var(--muted);white-space:nowrap">${fmt(m.last)}</td>
+    <td style="text-align:right"><button class="link" data-copy="${esc(m.link)}">Copy link</button></td></tr>`).join("")
+    || `<tr><td colspan="6" class="empty">${M.length?"No managers match these filters.":"No managers yet — run setup_links.py to create links."}</td></tr>`;
+}
+
+/* ---------- results ---------- */
+let view="qual";
+function renderResults(){
+  const fam=$("#rFam").value, F=D.families[fam];
+  if(!F){ $("#hb").innerHTML=`<tr><td class="empty">No job families loaded.</td></tr>`; return; }
+  $("#rsub").textContent=`${F.raters} submitted answer${F.raters===1?"":"s"} for ${fam}. Qual label = rounded average proficiency; N/A when average importance < ${D.threshold} or most raters chose N/A.`;
+  $("#hh").innerHTML=`<tr><th>Skill</th>${F.levels.map(l=>`<th>${esc(l.title)}<small>${esc(l.grade)}</small></th>`).join("")}</tr>`;
+  if(!F.raters){ $("#hb").innerHTML=`<tr><td colspan="${F.levels.length+1}" class="empty">No submissions yet for ${esc(fam)}.</td></tr>`; $("#legend").innerHTML=""; $("#flags").innerHTML=""; return; }
+  $("#hb").innerHTML=F.rows.map(r=>`<tr><td>${esc(r.skill)}</td>${r.cells.map(c=>{
+    if(view==="quant") return `<td><div class="q"><b>${f2(c.prof)}</b>IMP ${f2(c.imp)} · RUE ${f2(c.rue)}</div></td>`;
+    return `<td><span class="chip ${c.label?"":"na"}" style="background:${PC[c.label]}">${PL[c.label]}</span></td>`;}).join("")}</tr>`).join("");
+  $("#legend").innerHTML=view==="qual"?PL.map((l,i)=>`<span style="background:${PC[i]};${i?"":"color:var(--on-pna)"}">${i?i+" · ":""}${l}</span>`).join(""):`<span style="color:var(--muted)">PROF = avg proficiency (1–5, N/A excluded) · IMP = avg importance (0–4) · RUE = share "required upon entry" · N = ${F.raters} raters</span>`;
+  const col={"Progression break":"var(--bad)","Low rater agreement":"var(--warn)","Required upon entry":"var(--accent)"};
+  const flags=F.flags.slice();
+  if(F.raters<D.min_raters) flags.unshift({flag:"Low rater count",skill:fam,detail:`Only ${F.raters} submission(s) — wait for at least ${D.min_raters} before sharing results`});
+  $("#flags").innerHTML=flags.map(f=>`<div class="flag"><i style="background:${col[f.flag]||"var(--warn)"}"></i><div><b>${esc(f.flag)} · ${esc(f.skill)}</b><small>${esc(f.detail)}</small></div></div>`).join("")||`<div class="flag"><i style="background:var(--good)"></i><div><b>No issues found</b></div></div>`;
+}
+
+/* ---------- wiring ---------- */
+const famOpts=FAMS.map(f=>`<option>${esc(f)}</option>`).join("");
+$("#fFam").innerHTML=`<option value="">All job families</option>`+famOpts;
+$("#rFam").innerHTML=famOpts;
+$("#thr").innerHTML=[1,1.5,2,2.5].map(t=>`<option value="${t}" ${t===D.threshold?"selected":""}>N/A if IMP &lt; ${t}</option>`).join("");
+$("#xlsx").href=`/admin/workbook.xlsx?thr=${D.threshold}`;
+["#q","#fFam","#fSt"].forEach(s=>$(s).addEventListener("input",renderRows));
+$("#rFam").addEventListener("change",renderResults);
+$("#thr").addEventListener("change",e=>{ location.href=`/admin?thr=${e.target.value}#results`; });
+document.addEventListener("click",e=>{
+  const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.tab) showTab(b.dataset.tab);
+  if(b.dataset.view){view=b.dataset.view;document.querySelectorAll("[data-view]").forEach(x=>x.setAttribute("aria-pressed",x===b));renderResults();}
+  if(b.dataset.copy){ navigator.clipboard.writeText(b.dataset.copy).then(()=>toast("Link copied"),()=>toast(b.dataset.copy)); }
+});
+function showTab(t){document.querySelectorAll("[data-tab]").forEach(x=>x.setAttribute("aria-current",x.dataset.tab===t));
+  $("#progress").hidden=t!=="progress";$("#results").hidden=t!=="results";}
+renderProgress();renderResults();
+if(location.hash==="#results") showTab("results");
+})();
+</script>
+</body>
+</html>
