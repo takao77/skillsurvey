@@ -114,7 +114,29 @@ def header_block(ws, family, levels, per_level, subheads):
     return last
 
 
-def build(threshold: float, include_raw: bool, out: Path) -> Path:
+def family_flags(family: str, fam: dict, A: dict) -> list[list[str]]:
+    """Things HR should look at: [family, skill, flag, detail]."""
+    flags = []
+    for sk in fam["skills"]:
+        row = [A[(sk["name"], lv["title"])] for lv in fam["levels"]]
+        for i in range(1, len(row)):
+            a, b = row[i - 1], row[i]
+            if a["prof"] is not None and b["prof"] is not None and b["prof"] < a["prof"] - 0.25:
+                flags.append([family, sk["name"], "Progression break",
+                              f"PROF drops from {fam['levels'][i-1]['title']} ({a['prof']:.2f}) "
+                              f"to {fam['levels'][i]['title']} ({b['prof']:.2f})"])
+        for lv, a in zip(fam["levels"], row):
+            if a["sd"] >= 1:
+                flags.append([family, sk["name"], "Low rater agreement",
+                              f"{lv['title']}: proficiency spread ±{a['sd']:.2f} across {a['n']} raters"])
+        if row and row[0]["rue"] is not None and row[0]["rue"] >= 2 / 3:
+            flags.append([family, sk["name"], "Required upon entry",
+                          f"{row[0]['rue']:.0%} say it's needed on day one for {fam['levels'][0]['title']}"])
+    return flags
+
+
+def build(threshold: float = 1.5, include_raw: bool = False, out: Path | None = None):
+    """Create the workbook. Saves it when `out` is given; always returns the Workbook."""
     lib = load_library()
     subs = load_submissions()
     wb = Workbook()
@@ -164,22 +186,7 @@ def build(threshold: float, include_raw: bool, out: Path) -> Path:
         for col in range(4, lastq + 1):
             wq.column_dimensions[get_column_letter(col)].width = 18
 
-        # ---- flags for HR review
-        for sk in fam["skills"]:
-            row = [A[(sk["name"], lv["title"])] for lv in fam["levels"]]
-            for i in range(1, len(row)):
-                a, b = row[i - 1], row[i]
-                if a["prof"] is not None and b["prof"] is not None and b["prof"] < a["prof"] - 0.25:
-                    flags.append([family, sk["name"], "Progression break",
-                                  f"PROF drops from {fam['levels'][i-1]['title']} ({a['prof']:.2f}) "
-                                  f"to {fam['levels'][i]['title']} ({b['prof']:.2f})"])
-            for lv, a in zip(fam["levels"], row):
-                if a["sd"] >= 1:
-                    flags.append([family, sk["name"], "Low rater agreement",
-                                  f"{lv['title']}: proficiency spread ±{a['sd']:.2f} across {a['n']} raters"])
-            if row and row[0]["rue"] is not None and row[0]["rue"] >= 2 / 3:
-                flags.append([family, sk["name"], "Required upon entry",
-                              f"{row[0]['rue']:.0%} say it's needed on day one for {fam['levels'][0]['title']}"])
+        flags += family_flags(family, fam, A)
 
     # ---- Insights
     wi = wb.create_sheet("HR Insights", 0)
@@ -215,10 +222,11 @@ def build(threshold: float, include_raw: bool, out: Path) -> Path:
         for col in range(1, ws.max_column + 1):
             ws.column_dimensions[get_column_letter(col)].width = 60 if (ws is wi and col == 4) else 24
 
-    out.parent.mkdir(parents=True, exist_ok=True)
-    wb.save(out)
-    print(f"{len(subs)} submission(s) · {len(flags)} flag(s) · saved {out}")
-    return out
+    if out:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        wb.save(out)
+        print(f"{len(subs)} submission(s) · {len(flags)} flag(s) · saved {out}")
+    return wb
 
 
 if __name__ == "__main__":
